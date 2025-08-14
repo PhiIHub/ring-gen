@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Ring Design Generator</title>
+        <style>
+            *:focus {
+                outline: none
+            }
+
+            html,
+            body {
+                height: 100%
+            }
+
+            body {
+                margin: 0;
+                background: #0b0f17;
+                color: #e5e7eb;
+                font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial
+            }
+
+            a {
+                color: inherit;
+                text-decoration: none
+            }
+
+            button {
+                cursor: pointer
+            }
+
+            #app {
+                min-height: 100%;
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+                gap: 16px
+            }
+
+            header {
+                padding: 24px 18px;
+                background: radial-gradient(1200px 500px at 20% -10%, #1b2a48 0, #0b0f17 60%), radial-gradient(1000px 400px at 100% -20%, #13304a 0, #0b0f17 60%)
+            }
+
+            h1 {
+                margin: 0;
+                font-weight: 800;
+                letter-spacing: .3px;
+                background: linear-gradient(90deg, #c7d2fe, #67e8f9, #a7f3d0);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                font-size: 28px
+            }
+
+            p.sub {
+                margin: 8px 0 0;
+                color: #9ca3af;
+                font-size: 13px
+            }
+
+            main {
+                padding: 0 18px 24px
+            }
+
+            form.controls {
+                display: grid;
+                gap: 12px;
+                grid-template-columns: 1fr
+            }
+
+            fieldset {
+                border: 0;
+                padding: 0;
+                margin: 0
+            }
+
+            label {
+                font-size: 12px;
+                color: #94a3b8;
+                display: block;
+                margin-bottom: 6px
+            }
+
+            input,
+            select,
+            textarea {
+                width: 100%;
+                background: #0f172a;
+                border: 1px solid #1f2937;
+                border-radius: 12px;
+                color: #e5e7eb;
+                padding: 12px 14px
+            }
+
+            textarea {
+                min-height: 90px;
+                resize: vertical
+            }
+
+            input[type=range] {
+                padding: 0;
+                height: 32px
+            }
+
+            ::placeholder {
+                color: #6b7280
+            }
+
+            .row {
+                display: grid;
+                gap: 12px
+            }
+
+            .row.cols-2 {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .row.cols-3 {
+                grid-template-columns: 1fr 1fr 1fr
+            }
+
+            .btn {
+                border: 0;
+                background: #111827;
+                color: #e5e7eb;
+                border-radius: 14px;
+                padding: 12px 16px;
+                font-weight: 600;
+                border: 1px solid #1f2937
+            }
+
+            .btn.primary {
+                background: linear-gradient(180deg, #0ea5e9, #0891b2);
+                border: 0;
+                color: #081018
+            }
+
+            .btn.ghost {
+                background: #0b1220;
+                border: 1px solid #1f2937
+            }
+
+            .toolbar {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap
+            }
+
+            .panel {
+                background: linear-gradient(180deg, #0d1324, #0a0f1a);
+                border: 1px solid #1f2937;
+                border-radius: 16px;
+                padding: 16px;
+                box-shadow: 0 10px 30px #0008
+            }
+
+            .gallery {
+                display: grid;
+                gap: 14px;
+                margin-top: 16px;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))
+            }
+
+            .card {
+                position: relative;
+                border-radius: 16px;
+                overflow: hidden;
+                background: #0f172a;
+                border: 1px solid #1f2937
+            }
+
+            .card img {
+                width: 100%;
+                height: 220px;
+                object-fit: cover;
+                display: block;
+                filter: saturate(1.05)
+            }
+
+            .badge {
+                position: absolute;
+                top: 8px;
+                left: 8px;
+                background: #0b1220aa;
+                border: 1px solid #1f2937;
+                color: #cbd5e1;
+                border-radius: 10px;
+                padding: 6px 10px;
+                font-size: 11px;
+                backdrop-filter: blur(6px)
+            }
+
+            .card .actions {
+                position: absolute;
+                inset: auto 8px 8px 8px;
+                display: flex;
+                gap: 8px
+            }
+
+            .iconbtn {
+                flex: 1;
+                padding: 9px 10px;
+                border-radius: 10px;
+                border: 1px solid #1f2937;
+                background: #0b1220dd;
+                color: #e5e7eb;
+                font-size: 12px;
+                backdrop-filter: blur(6px)
+            }
+
+            .prompt-view {
+                margin-top: 8px;
+                font-size: 11px;
+                color: #9ca3af;
+                word-break: break-word
+            }
+
+            footer {
+                padding: 12px 18px;
+                color: #6b7280;
+                font-size: 12px;
+                border-top: 1px solid #111827
+            }
+
+            .split {
+                display: grid;
+                gap: 16px;
+                grid-template-columns: 1fr
+            }
+
+            @media(min-width:980px) {
+                main {
+                    padding: 0 28px 28px
+                }
+
+                .split {
+                    grid-template-columns: 420px 1fr
+                }
+            }
+
+            .small {
+                font-size: 12px
+            }
+
+            .circle {
+                width: 8px;
+                height: 8px;
+                border-radius: 999px;
+                background: #22d3ee;
+                display: inline-block;
+                margin-right: 6px
+            }
+
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 10px
+            }
+
+            .kbd {
+                font-family: ui-monospace, monospace;
+                background: #0b1220;
+                border: 1px solid #1f2937;
+                border-bottom-color: #0b0f17;
+                color: #93c5fd;
+                padding: 2px 6px;
+                border-radius: 6px;
+                font-size: 11px
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <header>
+                <div class="brand">
+                    <span class="circle"></span>
+                    <h1>Ring Design Generator</h1>
+                </div>
+                <p class="sub">Type a ring idea. The app builds a high-quality prompt and calls Pollinations to render photorealistic product shots.</p>
+            </header>
+            <main>
+                <div class="split">
+                    <div class="panel">
+                        <form class="controls" id="form">
+                            <fieldset>
+                                <label>Describe your ring</label>
+                                <input id="desc" placeholder="e.g. twisted platinum band with pear-cut sapphire halo" />
+                            </fieldset>
+                            <div class="row cols-2">
+                                <fieldset>
+                                    <label>Metal</label>
+                                    <select id="metal">
+                                        <option>Gold</option>
+                                        <option>Rose Gold</option>
+                                        <option>White Gold</option>
+                                        <option>Platinum</option>
+                                        <option>Silver</option>
+                                        <option>Titanium</option>
+                                        <option>Tungsten</option>
+                                    </select>
+                                </fieldset>
+                                <fieldset>
+                                    <label>Gemstone</label>
+                                    <select id="gem">
+                                        <option>Diamond</option>
+                                        <option>Sapphire</option>
+                                        <option>Emerald</option>
+                                        <option>Ruby</option>
+                                        <option>Opal</option>
+                                        <option>Moissanite</option>
+                                        <option>None</option>
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="row cols-3">
+                                <fieldset>
+                                    <label>Style</label>
+                                    <select id="style">
+                                        <option>Minimalist</option>
+                                        <option>Art Deco</option>
+                                        <option>Vintage</option>
+                                        <option>Nature</option>
+                                        <option>Gothic</option>
+                                        <option>Modern</option>
+                                        <option>Sci‑Fi</option>
+                                    </select>
+                                </fieldset>
+                                <fieldset>
+                                    <label>Stone Shape</label>
+                                    <select id="shape">
+                                        <option>Round</option>
+                                        <option>Oval</option>
+                                        <option>Princess</option>
+                                        <option>Pear</option>
+                                        <option>Marquise</option>
+                                        <option>Cushion</option>
+                                        <option>Asscher</option>
+                                    </select>
+                                </fieldset>
+                                <fieldset>
+                                    <label>Finish</label>
+                                    <select id="finish">
+                                        <option>Polished</option>
+                                        <option>Matte</option>
+                                        <option>Brushed</option>
+                                        <option>Hammered</option>
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="row cols-3">
+                                <fieldset>
+                                    <label>Aspect</label>
+                                    <select id="aspect">
+                                        <option value="768x768">Square 768</option>
+                                        <option value="1024x1360">Portrait</option>
+                                        <option value="1360x768" selected>Landscape</option>
+                                    </select>
+                                </fieldset>
+                                <fieldset>
+                                    <label>Variations</label>
+                                    <select id="count">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option selected>3</option>
+                                        <option>4</option>
+                                    </select>
+                                </fieldset>
+                                <fieldset>
+                                    <label>Seed</label>
+                                    <input id="seed" placeholder="random" />
+                                </fieldset>
+                            </div>
+                            <div class="panel" style="margin:8px 0;padding:12px">
+                                <div class="row cols-3">
+                                    <fieldset>
+                                        <label>Camera angle</label>
+                                        <select id="camAngle">
+                                            <option>Eye level</option>
+                                            <option>Low angle</option>
+                                            <option>High angle</option>
+                                            <option>Overhead</option>
+                                            <option>Dutch tilt</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset>
+                                        <label>Shot type</label>
+                                        <select id="camShot">
+                                            <option>Macro</option>
+                                            <option>Extreme close‑up</option>
+                                            <option>Close‑up</option>
+                                            <option>Medium</option>
+                                            <option>Full product</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset>
+                                        <label>Focus</label>
+                                        <select id="focusOn">
+                                            <option>Stone</option>
+                                            <option>Band</option>
+                                            <option>Setting</option>
+                                            <option>Engraving</option>
+                                            <option>Overall</option>
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="row cols-3">
+                                    <fieldset>
+                                        <label>Focal length</label>
+                                        <select id="focal">
+                                            <option>50mm</option>
+                                            <option>85mm</option>
+                                            <option selected>105mm macro</option>
+                                            <option>200mm</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset>
+                                        <label>Aperture</label>
+                                        <select id="aperture">
+                                            <option>f/1.8</option>
+                                            <option>f/2.8</option>
+                                            <option selected>f/4</option>
+                                            <option>f/8</option>
+                                            <option>f/11</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset>
+                                        <label>Depth of field</label>
+                                        <select id="dof">
+                                            <option>Shallow</option>
+                                            <option selected>Moderate</option>
+                                            <option>Deep</option>
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="row">
+                                    <fieldset>
+                                        <label>Advanced camera view (overrides above if filled)</label>
+                                        <textarea id="camAdvanced" placeholder="example: 105mm macro shot, ultra close focus on prong setting, f/4, glossy black acrylic base reflection, lens 30cm away, slight dutch tilt 5°, three‑point studio lighting, softbox key at 45°"></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="toolbar">
+                                <button class="btn primary" id="go">Generate</button>
+                                <button class="btn ghost" type="button" id="surprise">Surprise me</button>
+                                <button class="btn" type="button" id="clear">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel">
+                        <div class="toolbar small">
+                            <span class="kbd">Shift+Enter</span> quick generate
+                        </div>
+                        <div id="gallery" class="gallery"></div>
+                    </div>
+                </div>
+                <div class="panel" style="margin-top:16px">
+                    <div id="lastPrompt" class="prompt-view"></div>
+                </div>
+            </main>
+            <footer></footer>
+        </div>
+        <script>
+            const U = "https://image.pollinations.ai/prompt/";
+            const d = e => encodeURIComponent(e.replace(/\s+/g, " ").trim());
+            const r = () => Math.floor(1e12 + Math.random() * 9e12).toString();
+            const buildPrompt = () => {
+                const desc = document.getElementById("desc").value || "sculptural platinum ring with pear-cut diamond halo";
+                const metal = document.getElementById("metal").value;
+                const gem = document.getElementById("gem").value;
+                const style = document.getElementById("style").value;
+                const shape = document.getElementById("shape").value;
+                const finish = document.getElementById("finish").value;
+                const adv = document.getElementById("camAdvanced").value.trim();
+                if (adv) {
+                    return `luxury ring product photo, ${desc}, metal ${metal.toLowerCase()}, gemstone ${gem.toLowerCase()}, ${shape.toLowerCase()} cut, ${finish.toLowerCase()} finish, ${style.toLowerCase()} design, photorealistic, ultra detailed, ${adv}, black velvet background, high dynamic range, crisp focus`
+                };
+                const angle = document.getElementById("camAngle").value.toLowerCase();
+                const shot = document.getElementById("camShot").value.toLowerCase();
+                const focal = document.getElementById("focal").value.toLowerCase();
+                const aperture = document.getElementById("aperture").value.toLowerCase();
+                const dof = document.getElementById("dof").value.toLowerCase();
+                const focusOn = document.getElementById("focusOn").value.toLowerCase();
+                return `luxury ring product photo, ${desc}, metal ${metal.toLowerCase()}, gemstone ${gem.toLowerCase()}, ${shape.toLowerCase()} cut, ${finish.toLowerCase()} finish, ${style.toLowerCase()} design, ${shot}, ${angle} angle, ${focal}, aperture ${aperture}, ${dof} depth of field, focus on ${focusOn}, studio lighting, photorealistic, ultra detailed, macro texture, black velvet background, high dynamic range, crisp focus`
+            };
+            const buildURL = (p, w, h, seed) => `${U}${d(p)}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+            const gallery = document.getElementById("gallery");
+            const lastPrompt = document.getElementById("lastPrompt");
+            const card = (src, seed, prompt) => {
+                const c = document.createElement("div");
+                c.className = "card";
+                const img = document.createElement("img");
+                img.loading = "lazy";
+                img.src = src;
+                const b = document.createElement("div");
+                b.className = "badge";
+                b.textContent = `seed ${seed}`;
+                const actions = document.createElement("div");
+                actions.className = "actions";
+                const openBtn = document.createElement("button");
+                openBtn.className = "iconbtn";
+                openBtn.textContent = "Open";
+                openBtn.onclick = () => window.open(src, "_blank");
+                const dlBtn = document.createElement("button");
+                dlBtn.className = "iconbtn";
+                dlBtn.textContent = "Download";
+                dlBtn.onclick = async () => {
+                    const a = document.createElement("a");
+                    a.href = src;
+                    a.download = `ring_${seed}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove()
+                };
+                const copyBtn = document.createElement("button");
+                copyBtn.className = "iconbtn";
+                copyBtn.textContent = "Copy URL";
+                copyBtn.onclick = () => navigator.clipboard.writeText(src);
+                actions.append(openBtn, dlBtn, copyBtn);
+                c.append(img, b, actions);
+                const p = document.createElement("div");
+                p.className = "prompt-view";
+                p.textContent = prompt;
+                const wrap = document.createElement("div");
+                wrap.append(c, p);
+                return wrap
+            };
+            const gen = async () => {
+                const prompt = buildPrompt();
+                const [w, h] = document.getElementById("aspect").value.split("x");
+                const cnt = parseInt(document.getElementById("count").value, 10);
+                let seed = document.getElementById("seed").value.trim();
+                if (!seed) seed = r();
+                gallery.innerHTML = "";
+                for (let i = 0; i < cnt; i++) {
+                    const s = i ? r() : seed;
+                    const url = buildURL(prompt, w, h, s);
+                    gallery.append(card(url, s, prompt))
+                }
+                lastPrompt.textContent = prompt;
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set("p", prompt);
+                urlParams.set("s", seed);
+                urlParams.set("a", `${w}x${h}`);
+                history.replaceState(null, "", `?${urlParams.toString()}`)
+            };
+            document.getElementById("go").addEventListener("click", e => {
+                e.preventDefault();
+                gen()
+            });
+            document.getElementById("form").addEventListener("keydown", e => {
+                if (e.key === "Enter" && e.shiftKey) {
+                    e.preventDefault();
+                    gen()
+                }
+            });
+            document.getElementById("clear").addEventListener("click", () => {
+                gallery.innerHTML = "";
+                lastPrompt.textContent = ""
+            });
+            const ideas = ["organic gold ring with twig texture wrapping a marquise opal", "split-shank platinum ring with oval sapphire and hidden halo", "matte titanium band with hammered edges and offset channel-set diamonds", "rose gold toi et moi ring with pear and emerald cut stones crossing", "black rhodium white-gold ring with gothic filigree and blood-red ruby", "minimalist knife-edge platinum solitaire with floating tension setting", "art deco geometric step-cut emerald with milgrain details and baguettes"];
+            document.getElementById("surprise").addEventListener("click", () => {
+                document.getElementById("desc").value = ideas[Math.floor(Math.random() * ideas.length)]
+            });
+            window.addEventListener("load", () => {
+                const u = new URLSearchParams(location.search);
+                const p = u.get("p");
+                const s = u.get("s");
+                const a = u.get("a");
+                if (p) document.getElementById("desc").value = p;
+                if (a) document.getElementById("aspect").value = a;
+                if (s) document.getElementById("seed").value = s;
+                if (p) gen()
+            });
+        </script>
+    </body>
+</html>
